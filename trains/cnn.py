@@ -33,7 +33,6 @@ def train_model(model_name):
 
     model.train(
         dataset=mnist,
-        learning_rate=0.005,
         eval_every=5,
         epochs=500,
         evaluation_size=500,
@@ -42,5 +41,6 @@ def train_model(model_name):
 
     model_path = "trained_model/" + model_name + "/" + model_name
     model.save(model_path)
+
 
 train_model("cnn")

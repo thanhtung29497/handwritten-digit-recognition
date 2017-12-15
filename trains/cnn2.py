@@ -33,7 +33,6 @@ def train_model(model_name):
 
     model.train(
         dataset=mnist,
-        learning_rate=0.005,
         eval_every=5,
         epochs=1000,
         evaluation_size=500,

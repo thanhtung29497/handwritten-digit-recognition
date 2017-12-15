@@ -19,8 +19,8 @@ class CNNModel:
             shape=[None, image_size[0] * image_size[1]],
             name="inputs")
 
-        self.model = reshape(
-            self.inputs, [-1, image_size[0], image_size[1], channel])
+        self.model = reshape(self.inputs,
+                             [-1, image_size[0], image_size[1], channel])
         self.labels = placeholder(float32, shape=[None, 10], name="labels")
         self.sess = InteractiveSession()
 
@@ -32,7 +32,6 @@ class CNNModel:
 
     def train(self,
               dataset,
-              learning_rate=0.005,
               eval_every=5,
               epochs=500,
               evaluation_size=500,
@@ -41,7 +40,7 @@ class CNNModel:
         train_step = optimizer.minimize(self.loss)
         prediction = argmax(self.model, 1, name="prediction")
         result = equal(argmax(self.labels, 1), prediction, name="result")
-        accuracy = reduce_mean(cast(result, float32))
+        self.accuracy = reduce_mean(cast(result, float32), name="accuracy")
         train_loss = []
         train_accuracy = []
         test_accuracy = []
@@ -60,8 +59,8 @@ class CNNModel:
                 # Cu sau eval_every buoc lap thi test mot lan
                 test_batch = dataset.test.next_batch(evaluation_size)
                 temp_train_loss = self.loss.eval(feed_dict=train_dict)
-                temp_train_accuracy = accuracy.eval(feed_dict=train_dict)
-                temp_test_accuracy = accuracy.eval(feed_dict={
+                temp_train_accuracy = self.accuracy.eval(feed_dict=train_dict)
+                temp_test_accuracy = self.accuracy.eval(feed_dict={
                     self.inputs: test_batch[0],
                     self.labels: test_batch[1]
                 })
@@ -82,6 +81,16 @@ class CNNModel:
         # Show plots
         loss_per_epoch(epochs, eval_every, train_loss)
         train_test_accuracy(epochs, eval_every, train_accuracy, test_accuracy)
+
+    def test(self, dataset):
+        """
+            test model with entire mnist_test
+        """
+        print('test accuracy %g' % self.accuracy.eval(
+            feed_dict={
+                self.inputs: dataset.test.images,
+                self.labels: dataset.test.labels,
+            }))
 
     def save(self, model_path):
         """
